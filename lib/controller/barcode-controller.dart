@@ -1,12 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:dio/dio.dart' as dio;
+import 'package:dio/io.dart';
 import 'package:epustakakotamedan_v2/models/model.dart';
 import 'package:epustakakotamedan_v2/services/config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io'; // Untuk HttpClient dan SecurityContext
+import 'package:dio/dio.dart';
 
 class BarcodeController extends GetxController {
   var selectedInstansiId = 0.obs;
@@ -35,10 +38,21 @@ class BarcodeController extends GetxController {
   Future<void> loadInstansi() async {
     try {
       isLoading.value = true;
-      final response = await dio.Dio().get(
-          'http://157.15.116.164/bkd-presensi/api/mobile?req=list_instansi');
 
-      // Menampilkan response di console
+      final dioInstance = Dio();
+
+      // Mengabaikan verifikasi SSL
+      (dioInstance.httpClientAdapter as IOHttpClientAdapter).createHttpClient =
+          () {
+        final client = HttpClient();
+        client.badCertificateCallback =
+            (X509Certificate cert, String host, int port) => true;
+        return client;
+      };
+
+      final response = await dioInstance
+          .get('https://disperpustakaanarsip.medan.go.id/backend/api/opd');
+
       print('Response Data: ${response.data}');
 
       if (response.statusCode == 200) {
@@ -47,7 +61,7 @@ class BarcodeController extends GetxController {
       }
     } catch (e) {
       Get.snackbar('Error', 'Gagal memuat data instansi');
-      print('Error: $e'); // Menampilkan error di console
+      print('Error: $e');
     } finally {
       isLoading.value = false;
     }

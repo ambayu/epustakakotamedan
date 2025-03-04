@@ -60,6 +60,7 @@ class LoginController extends GetxController {
     } catch (e) {
       errorMessage.value = 'Error: ${e.toString()}';
       print(errorMessage.value);
+      print("ulululu");
     } finally {
       isLoading.value = false;
     }

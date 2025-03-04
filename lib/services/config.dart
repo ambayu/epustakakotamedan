@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 
 class Config {
   static const String environment =
@@ -14,8 +17,8 @@ class Config {
       'baseUrlFoto': 'http://192.168.1.4:8000',
     },
     'server': {
-      'baseUrl': 'http://perpustakaan.medan.go.id:82/back-end/api',
-      'baseUrlFoto': 'http://perpustakaan.medan.go.id:82/back-end',
+      'baseUrl': 'https://disperpustakaanarsip.medan.go.id/backend/api',
+      'baseUrlFoto': 'https://disperpustakaanarsip.medan.go.id/backend',
     },
   };
 
@@ -37,12 +40,21 @@ class DioConfig {
     final dio = Dio()
       ..options.baseUrl = config['baseUrl'] ?? ''
       ..options.headers['accept'] = 'application/json'
-      ..options.connectTimeout = const Duration(seconds: 10)
-      ..options.receiveTimeout = const Duration(seconds: 10)
-      ..options.sendTimeout = const Duration(seconds: 10)
+      ..options.connectTimeout =
+          const Duration(seconds: 30) // Ubah ke 30 detik jika perlu
+      ..options.receiveTimeout = const Duration(seconds: 30)
+      ..options.sendTimeout = const Duration(seconds: 30)
       ..options.validateStatus = (status) {
         return status! < 500;
       };
+
+    // Abaikan SSL certificate (Hanya untuk debugging, jangan di produksi!)
+    (dio.httpClientAdapter as IOHttpClientAdapter).onHttpClientCreate =
+        (client) {
+      client.badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+      return client;
+    };
 
     return dio;
   }
